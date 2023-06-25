@@ -19,6 +19,7 @@ async function createAirplane(req, res){
                 .json(SuccessResponse)
     }
     catch(error){
+        ErrorResponse.error = error
         return res.status(error.statusCode)
         .json(ErrorResponse)
     }
