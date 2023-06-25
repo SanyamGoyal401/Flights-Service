@@ -1,5 +1,5 @@
 {
-  "name": "basic_node_js_project_template",
+  "name": "flight_app",
   "version": "1.0.0",
   "description": "Basic starter template for backend",
   "main": "index.js",
