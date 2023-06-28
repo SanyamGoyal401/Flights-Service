@@ -1,5 +1,4 @@
 'use strict';
-const {City} = require("./index");
 const {
   Model
 } = require('sequelize');
@@ -12,7 +11,11 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      Airport.hasOne(City);
+      this.belongsTo(models.City, {
+        foreignKey: 'cityId',
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
+      });
     }
   }
   Airport.init({
