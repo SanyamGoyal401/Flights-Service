@@ -29,6 +29,9 @@ async function getAirplanes(){
         return airplanes;
     }
     catch(error){
+        if(error.statusCode == StatusCodes.NOT_FOUND){
+            throw new AppError("Cannot fetch data of all airplanes", error.statusCode);
+        }
         throw new AppError("Cannot fetch data of all the airplanes", StatusCodes.INTERNAL_SERVER_ERROR);
     }
 }
