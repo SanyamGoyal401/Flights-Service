@@ -1,6 +1,8 @@
 const { StatusCodes } = require("http-status-codes");
 const {FlightRepository} = require("../repositories");
 const AppError = require("../utils/errors/app-error");
+const {Op} = require('sequelize');
+
 
 const flightRepository = new FlightRepository();
 async function createFlight(data){
@@ -23,49 +25,47 @@ async function createFlight(data){
 }
 
 
-async function getFlights(){
+async function getAllFlights(query){
+    //tirps = MUM-DEL
+    let customFilter = {};
+    let sortFilter = [];
+    if(query.trips){
+        let [departureAirportId, arrivalAirportId] = query.trips.split('-');
+        customFilter.departureAirportId = departureAirportId;
+        customFilter.arrivalAirportId = arrivalAirportId;
+    }
+    if(query.price){
+        let [low, high] = query.price.split('-');
+        customFilter.price = {[Op.between]:[low, (high == undefined) ? 20000: high]}
+    }
+    if(query.travellers){
+        customFilter.totalSeats = {
+            [Op.gte] : query.travellers
+        }
+    }
+    if(query.tripDate){
+        customFilter.departureTime = {
+           [Op.between] : [query.tripDate, query.tripDate+" 23:59:00"]
+        }
+    }
+    if(query.sort){
+        const params = query.sort.split(',')
+        const sortFilters = params.map((param)=>param.split('_'));
+        sortFilter = sortFilters
+    }
+
     try{
-        const flights = await flightRepository.getAll();
+        const flights = flightRepository.getAllFlights(customFilter ,sortFilter)
         return flights;
     }
     catch(error){
-        if(error.statusCode == StatusCodes.NOT_FOUND){
-            throw new AppError("Cannot fetch data of all flights", error.statusCode);
-        }
-        throw new AppError("Cannot fetch data of all the flights", StatusCodes.INTERNAL_SERVER_ERROR);
+        throw new AppError('Cannot fetch data of all Flights', StatusCodes.INTERNAL_SERVER_ERROR);
     }
-}
-
-async function getFlight(id){
-    try{
-        const response = await flightRepository.get(id);
-        return response;
-    }
-    catch(error){
-        if(error.statusCode == StatusCodes.NOT_FOUND){
-            throw new AppError("The flight you requested is not found", error.statusCode);
-        }
-        throw new AppError("Cannot fetch data of the flight", StatusCodes.INTERNAL_SERVER_ERROR);
-    }
-}
 
 
-async function destroyFlight(id){
-    try{
-        const response = await flightRepository.destroy(id);
-        return response;
-    }
-    catch(error){
-        if(error.statusCode == StatusCodes.NOT_FOUND){
-            throw new AppError("The flight you requested is not found", error.statusCode);
-        }
-        throw new AppError("Cannot fetch data of the flight", StatusCodes.INTERNAL_SERVER_ERROR);
-    }
 }
 
 module.exports = {
     createFlight,
-    getFlights,
-    getFlight,
-    destroyFlight,
+    getAllFlights,
 }

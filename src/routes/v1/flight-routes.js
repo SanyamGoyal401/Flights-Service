@@ -14,4 +14,8 @@ router.post(
 );
 
 
+// /api/v1/Flights/ GET
+router.get('/', FlightController.getAllFlights);
+
+
 module.exports = router;
