@@ -23,9 +23,15 @@ async function createAirport(data){
 }
 
 
-async function getAirports(){
+async function getAllAirports(query){
+    filter = {}
+    if(query.departureAirportId || query.arrivalAirportId || query.code){
+        filter = {
+            code: query.departureAirportId || query.arrivalAirportId || query.code
+        }
+    }
     try{
-        const airports = await airportRepository.getAll();
+        const airports = await airportRepository.getAllAirports(filter);
         return airports;
     }
     catch(error){
@@ -65,7 +71,7 @@ async function destroyAirport(id){
 
 module.exports = {
     createAirport,
-    getAirports,
+    getAllAirports,
     getAirport,
     destroyAirport,
 }

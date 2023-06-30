@@ -34,7 +34,7 @@ async function createAirport(req, res){
  **/
 async function getAirports(req, res){
     try{
-        const response = await AirportService.getAirports();
+        const response = await AirportService.getAllAirports(req.query);
         SuccessResponse.data = response;
         return res 
                 .status(StatusCodes.OK)
