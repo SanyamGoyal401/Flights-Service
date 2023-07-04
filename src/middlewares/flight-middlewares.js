@@ -79,4 +79,22 @@ function validateCreateRequest(req, res, next){
     next();
 }
 
-module.exports = {validateCreateRequest}
+function validateUpdateSeatsRequest(req, res, next){
+    if(!req.params.id){
+        ErrorResponse.message = "Something went wrong while updating seats";
+        ErrorResponse.error = new AppError(["FlightId not found in the incoming request"],StatusCodes.BAD_REQUEST);
+        return res
+            .status(StatusCodes.BAD_REQUEST)
+            .json(ErrorResponse)
+    }
+    if(!req.body.seats){
+        ErrorResponse.message = "Something went wrong while updating seats";
+        ErrorResponse.error = new AppError(["Seats not found in the incoming request"],StatusCodes.BAD_REQUEST);
+        return res
+            .status(StatusCodes.BAD_REQUEST)
+            .json(ErrorResponse)
+    }
+    next();
+}
+
+module.exports = {validateCreateRequest, validateUpdateSeatsRequest}
