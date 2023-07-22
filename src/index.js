@@ -14,7 +14,6 @@ app.all('/', (req, res)=>{
 })
 
 
-
 app.use('/api', apiRoutes);
 
 

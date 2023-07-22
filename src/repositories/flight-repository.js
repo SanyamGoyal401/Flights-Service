@@ -1,8 +1,8 @@
-const {Sequelize, Op, where} = require('sequelize');
+const { Sequelize, Op, where, fn } = require('sequelize');
 const CrudRepository = require("./crud-repository");
-const { Flight, Airplane, Airport} = require("../models");
+const { Flight, Airplane, Airport } = require("../models");
 const db = require('../models');
-const {addRowLockOnFlights} = require('./queries');
+const { addRowLockOnFlights } = require('./queries');
 
 class FlightRepository extends CrudRepository {
     constructor() {
@@ -18,52 +18,54 @@ class FlightRepository extends CrudRepository {
                 order: sort,
                 include: [
                     {
-                        model: Airplane, 
-                        required : true,
+                        model: Airplane,
+                        required: true,
                         as: "airplane_detail",
                     },
                     {
-                        model:Airport,
+                        model: Airport,
                         required: true,
                         as: "departure_airport",
-                        on:{
+                        on: {
                             col1: Sequelize.where(Sequelize.col("Flight.departureAirportId"), "=", Sequelize.col("departure_airport.code"))
-                        },                    
+                        },
                     },
                     {
-                        model:Airport,
+                        model: Airport,
                         required: true,
                         as: "arrival_airport",
-                        on:{
+                        on: {
                             col1: Sequelize.where(Sequelize.col("Flight.arrivalAirportId"), "=", Sequelize.col("arrival_airport.code"))
-                        },                    
+                        },
                     }
                 ]
             });
             return response;
         }
-        catch(error){
+        catch (error) {
             console.log(error);
         }
     }
 
 
-    async updateRemainingSeats(flightId, seats, dec = true){
-        await db.sequelize.query(addRowLockOnFlights(flightId));
-        const flight = await Flight.findByPk(flightId);
-        try{
-            if(dec){
-                await flight.decrement('totalSeats', {by: seats});
-            }
-            else{
-                await flight.increment('totalSeats', {by: seats});
-            }
-            return flight;
-        }
-        catch(error){
+    async updateRemainingSeats(flightId, seats, dec = true) {
+        try {
+            const result = await db.sequelize.transaction(async function updateSeatsImpl(t) {
+                await db.sequelize.query(addRowLockOnFlights(flightId));
+                const flight = await Flight.findByPk(flightId);
+                if (dec) {
+                    await flight.decrement('totalSeats', { by: seats });
+                }
+                else {
+                    await flight.increment('totalSeats', { by: seats });
+                }
+                return flight;
+            });
+            return result;
+        } catch (error) {
             console.log(error);
         }
-        
+
     }
 }
 
