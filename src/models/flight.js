@@ -62,6 +62,9 @@ module.exports = (sequelize, DataTypes) => {
     totalSeats: { 
       type: DataTypes.INTEGER,
       allowNull: false,
+      validate: {
+        min: 0
+      }
     }
   }, {
     sequelize,
